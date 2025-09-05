@@ -3,8 +3,6 @@ from rich.console import Console
 from datetime import datetime
 import os
 console = Console()
-#from rich.live import Live
-#from rich.table import Table
 
 
 def addItem(data):
@@ -50,7 +48,6 @@ def removeItem(data):
         console.print("That priority number doesnt exist")
         
     saveList(data)
-    #main()
 
 def showList(data, userFilterInput=None):
     
@@ -95,13 +92,6 @@ def showList(data, userFilterInput=None):
                 if tasks['priority'] == i:
                     sortedTasks.append(tasks)
         saveList(sortedTasks)
-                    #if tasks['status'] == True:
-                        #console.print("\n✅️", end=" ")
-                    #else:
-                        #console.print("\n🔲", end=" ")
-                    #console.print("# ", tasks['priority'], style="sky_blue1", end=" ")
-                    #console.print(tasks['name'], style="sky_blue1", end=" ")
-                    #console.print(tasks['due_Date'], "\n", style="sky_blue1")
         console.print("\n\n")
     elif userFilterInput == 4:
         priorityList = []
@@ -141,19 +131,16 @@ def showList(data, userFilterInput=None):
             console.print("# ", task['priority'], style="sky_blue1", end=" ")
             console.print(task['name'], style="sky_blue1", end=" ")
             console.print(task['due_Date'], "\n")
-    #main()
 
 def saveList(data): # Save to file
     filename = r"D:\Coding Projects\Summer2025\To-do_List\list.json"
     with open(filename, 'w') as json_file:
             json.dump(data, json_file, indent=4)
-    #main()
 
 def deleteList():
     filename = r"D:\Coding Projects\Summer2025\To-do_List\list.json"
     with open(filename, 'w') as json_file:
         json.dump([], json_file)
-    #main()
 
 def loadList(): # Read from file
     filename = r"D:\Coding Projects\Summer2025\To-do_List\list.json"
