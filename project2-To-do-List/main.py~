@@ -1,0 +1,260 @@
+import json
+from rich.console import Console
+from datetime import datetime
+import os
+console = Console()
+#from rich.live import Live
+#from rich.table import Table
+
+
+def addItem(data):
+    console.print("What is the Task Name?", style="sky_blue2", end=" ")
+    name = str(input(""))
+    console.print("What is the priority? Enter a number:", style="sky_blue2", end=" ")
+    priority = int(input(""))
+    console.print("What is the status, complete or incomplete?", style="sky_blue2", end=" ")
+    status = str(input(""))
+    if status == 'complete':
+        status = True
+    elif status == 'incomplete':
+        status = False
+    console.print("What is the due date (MM/DD/YYYY)? Press enter if nothing", style="sky_blue2", end=" ")
+    user_date_input = input()
+    if user_date_input.strip() == "":
+        date = ''
+    else: 
+        date_time = datetime.strptime(user_date_input, "%m/%d/%Y")
+        date = date_time.strftime("%m/%d/%Y")
+    #if user_date_input == '':
+        #date = ''
+    for i in data:
+        if priority == i['priority']:
+            console.print("That priority number already exists, please enter a new one", style="sky_blue3", end=" ")
+            priority = int(input(""))
+    new_item = {'name': name,
+                'status':status,
+                'priority':priority,
+                'due_Date':date}
+    data.append(new_item)
+    saveList(data)
+    #main()
+
+def removeItem(data):
+    console.print("What item would you like to remove, by priority number:", style="sky_blue3", end=" ")
+    item = int(input(""))
+    for task in data:
+        if item == task['priority']:
+            data.remove(task)
+            break
+    else:
+        console.print("That priority number doesnt exist")
+        
+    saveList(data)
+
+def showList(data, userFilterInput=None):
+    
+    if data == []:
+        return
+    
+    if userFilterInput == None:
+        for task in data:
+            if task['status'] == True:
+                console.print("\n✅️", end=" ")
+            else:
+                console.print("\n🔲", end=" ")
+            console.print("#", task['priority'], style="sky_blue1", end=" ")
+            console.print(task['name'], style="sky_blue1", end=" ")
+            console.print(task['due_Date'], "\n", style="sky_blue1")
+
+    if userFilterInput == 1:
+        console.print("\n\n")
+        for task in data:
+            if task['status'] != True:
+                console.print("\n🔲", end=" ")
+                console.print("# ", task['priority'], style="sky_blue1", end=" ")
+                console.print(task['name'], style="sky_blue1", end=" ")
+                console.print(task['due_Date'], "\n", style="sky_blue1")
+        console.print("\n\n")
+    elif userFilterInput == 2:
+        for task in data:
+            if task['status'] == True:
+                console.print("\n✅️", end=" ")
+                console.print("# ", task['priority'], style="sky_blue1", end=" ")
+                console.print(task['name'], style="sky_blue1", end=" ")
+                console.print(task['due_Date'], "\n", style="sky_blue1")
+    elif userFilterInput == 3:
+        console.print("\n\n")
+        priorityList = []
+        for task in data:
+            priorityList.append(task['priority'])
+        sortedVersion = sorted(priorityList)
+        sortedTasks = []
+        for i in sortedVersion:
+            for tasks in data:
+                if tasks['priority'] == i:
+                    sortedTasks.append(tasks)
+        saveList(sortedTasks)
+        console.print("\n\n")
+    elif userFilterInput == 4:
+        priorityList = []
+        for task in data:
+            if task['status'] != True:
+                priorityList.append(task['priority'])
+        priorityList = list(set(priorityList))
+        sortedVersion = sorted(priorityList)
+        for i in sortedVersion:
+            for tasks in data:
+                if tasks['priority'] == i and tasks['status'] != True:
+                    console.print("\n🔲", end=" ")
+                    console.print("# ", task['priority'], style="sky_blue1", end=" ")
+                    console.print(task['name'], style="sky_blue1", end=" ")
+                    console.print(task['due_Date'], "\n", style="sky_blue1")
+    elif userFilterInput == 5:
+        dateList = []
+        for task in data:
+            dateList.append(task['due_Date'])
+        sortedVersion = sorted(dateList)
+        for tasks in data:
+            for i in sortedVersion:
+                if tasks['due_Date'] == i:
+                    if tasks['status'] == True:
+                        console.print("\n✅️", end=" ")
+                    else:
+                        console.print("\n🔲", end=" ")
+                    console.print("# ", tasks['priority'], style="sky_blue1", end=" ")
+                    console.print(tasks['name'], style="sky_blue1", end=" ")
+                    console.print(tasks['due_Date'], "\n", style="sky_blue1")  
+    elif userFilterInput == 6:
+        for task in data:
+            if task['status'] == True:
+                console.print("\n✅️", end=" ")
+            else:
+                console.print("\n🔲", end=" ")
+            console.print("# ", task['priority'], style="sky_blue1", end=" ")
+            console.print(task['name'], style="sky_blue1", end=" ")
+            console.print(task['due_Date'], "\n")
+
+def saveList(data): # Save to file
+    filename = r"D:\Coding Projects\Summer2025\To-do_List\list.json"
+    with open(filename, 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+
+def deleteList():
+    filename = r"D:\Coding Projects\Summer2025\To-do_List\list.json"
+    with open(filename, 'w') as json_file:
+        json.dump([], json_file)
+
+def loadList(): # Read from file
+    filename = r"D:\Coding Projects\Summer2025\To-do_List\list.json"
+    if os.path.exists(filename):
+        entries = []
+        with open(r'D:\Coding Projects\Summer2025\To-do_List\list.json', 'r') as file:
+            data = json.load(file)
+        if data != []:
+            for i in data:
+                entry = {"name": i["name"], 
+                        "status": i["status"], 
+                        "priority": i["priority"],
+                        "due_Date": i['due_Date']}
+                entries.append(entry)
+            return entries
+        else:
+            return []
+    else:
+        empty_data = []
+        with open(filename, 'w') as json_file:
+            json.dump(empty_data, json_file)
+        return []
+
+
+def main():
+    
+    while True:
+        
+        console.print("\n\n\nTODO List", style="bold underline royal_blue1")
+        
+        data = loadList()
+        if data:
+            showList(data)
+        else:
+            console.print("\nThere are no items in the TODO List", style="sky_blue3")
+        
+        console.print("\nPlease Choose an Option:", style="bold sky_blue3")
+        console.print("\n1. Add Item", style="sky_blue2")
+        console.print("2. Delete Item", style="sky_blue2")
+        console.print("3. Filter/Sort List", style="sky_blue2")
+        console.print("4. Change Priority", style="sky_blue2")
+        console.print("5. Change Due Date", style="sky_blue2")
+        console.print("6. Mark as Done", style="sky_blue2")
+        console.print("7. Save list", style="sky_blue2")
+        console.print("8. Delete list", style="sky_blue2")
+        console.print("\nEnter the number of the option you would like to do:", style="sky_blue3", end=" ")
+        user = int(console.input(""))
+        
+        if user == 1:
+            addItem(data)
+            #showList(loadList())
+        elif user == 2:
+            removeItem(data)
+            #showList(loadList())
+        elif user == 3:
+            console.print("What would you like to filter by?", style="sky_blue3")
+            console.print("1. Show Only Incomplete Items", style="sky_blue2")
+            console.print("2. Show Only Complete Items", style="sky_blue2")
+            console.print("3. Sort by Priority", style="sky_blue2")
+            console.print("4. Sort by Priority and Incomplete Items", style="sky_blue2")
+            console.print("5. Sort by Due Date", style="sky_blue2")
+            console.print("6. Show All Items", style="sky_blue2")
+            console.print("\nEnter the number of the option you would like to do:", style="sky_blue3", end=" ")
+            userFilterInput = int(console.input(""))
+            showList(data=data, userFilterInput=userFilterInput)
+        elif user == 4:
+            console.print("Please enter the priority number of the task you would like to change", style="sky_blue3", end=" ")
+            selected = int(input(""))
+            for task in data:
+                if selected == task['priority']:
+                    console.print("What would you like to change the priority too?", style="sky_blue3", end=" ")
+                    new = int(input(""))
+                    for other_task in data:
+                        if other_task != task and other_task['priority'] == new:
+                            other_task['priority'] = selected
+                    task['priority'] = new
+                    saveList(data)
+                    break
+        elif user == 5:
+            console.print("Please enter the priority number of the task you would like to change", style="sky_blue3", end=" ")
+            selected = int(input(""))
+            for task in data:
+                if selected == task['priority']:
+                    console.print("What would you like to change the date too (MM/DD/YYYY)? Press enter if nothing", style="sky_blue2", end=" ")
+                    user_date_input = input()
+                    date_time = datetime.strptime(user_date_input, "%m/%d/%Y")
+                    date = date_time.strftime("%m/%d/%Y")
+                    if user_date_input == '':
+                        date = None
+                    task['due_Date'] = date
+                    saveList(data)
+                    break
+        elif user == 6:
+            console.print("Please enter the priority number of the task you would like to change", style="sky_blue3", end=" ")
+            selected = int(input(""))
+            for task in data:
+                if selected == task['priority']:
+                    console.print("Enter whether the task is going to be complete or incomplete", style="sky_blue2", end=" ")
+                    new = str(input(""))
+                    if new == "complete":
+                        new = True
+                    elif new == "incomplete":
+                        new = False
+                    task['status'] = new
+                    saveList(data)
+                    break
+        elif user == 7:
+            saveList(data)
+        elif user == 8:
+            deleteList()
+        else:
+            console.print("\nPlease enter the NUMBER of the option this time", style="bold sky_blue3", end=" ")
+            user = int(console.input(""))
+
+main()
