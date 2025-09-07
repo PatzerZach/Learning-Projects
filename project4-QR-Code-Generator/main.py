@@ -5,7 +5,6 @@ from PIL import ImageTk, Image
 import win32api
 from pathlib import Path
 
-# want a gui to control the settings and also display the qrcode, implement color wheels in tkinter to change color
 
 fill_color_rgb = (0, 0, 0)
 bg_color_rgb = (255, 255, 255)
