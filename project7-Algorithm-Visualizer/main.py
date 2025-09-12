@@ -6,6 +6,7 @@ bubble_pressed = False
 def bubble_sort(array):
     if bubble_pressed == True:
         n = len(array)
+        bar_height(array)
         
         for i in range(n):
             swapped = False
@@ -17,6 +18,14 @@ def bubble_sort(array):
             if (swapped == False):
                 break
         print(array)
+    
+def bar_height(array):
+    max_val = max(array) # bar fills entire canvas, rest of the values get scaled dynamically
+    for val in array:
+        if val != max_val:
+            bar_height = val
+            
+        
 
 def bubble_button():
     global bubble_pressed
