@@ -5,8 +5,8 @@ bubble_pressed = False
 
 def bubble_sort(array):
     if bubble_pressed == True:
+        draw_bars(array)
         n = len(array)
-        bar_height(array)
         
         for i in range(n):
             swapped = False
@@ -17,16 +17,43 @@ def bubble_sort(array):
                     swapped = True
             if (swapped == False):
                 break
-        print(array)
     
-def bar_height(array):
-    max_val = max(array) # bar fills entire canvas, rest of the values get scaled dynamically
-    for val in array:
-        if val != max_val:
-            bar_height = val
-            
-        
+    
+def draw_bars(array):
+    canvas.delete("all")
+    
+    n = len(array)
+    if n == 0:
+        return
+    
+    if 35 <= n <= 50:
+        font_size = 10
+    elif 15 <= n <= 34:
+        font_size = 20
+    elif 1 <= n <= 14:
+        font_size = 30
+    
+    x_gap = 20 # The gap between left canvas edge and y axis
+    y_gap = 20 # The gap between lower canvas edge and x axis
+    c_width = 1300
+    c_height = 700
+    
+    bar_width = (c_width - 2 * x_gap) / n
+    max_val = max(array)
 
+    for i, val in enumerate(array):
+        x0 = x_gap + i * bar_width
+        x1 = x_gap + (i + 1) * bar_width
+        
+        bar_height = (val / max_val) * (c_height - 2 * y_gap)
+        y0 = c_height - y_gap - bar_height
+        y1 = c_height - y_gap
+        
+        canvas.create_rectangle(x0, y0, x1, y1, fill="gray")
+        label_x = (x0 + x1) / 2
+        label_y = (y0 + y1) / 2
+        canvas.create_text(label_x, label_y, text=val, font=("Helvetica", font_size))
+        
 def bubble_button():
     global bubble_pressed
     bubble_pressed = not bubble_pressed
@@ -38,6 +65,7 @@ def start():
 
 def main():
     global num_input
+    global canvas
     root = tk.Tk()
     root.title("Algorithm Visualizer")
     root.geometry("1400x900")
@@ -51,6 +79,10 @@ def main():
     num_input.pack()
     start_button = Button(root, text="Start", command=start, font=("Hevletica", 14))
     start_button.pack()
+    c_width = 1300
+    c_height = 700
+    canvas = tk.Canvas(root, width=c_width, height=c_height, bg='light gray')
+    canvas.pack()
     
     
     root.mainloop()
