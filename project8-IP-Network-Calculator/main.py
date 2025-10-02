@@ -1,1 +1,147 @@
-print("hello world")
+def shortMethod(ip, mask):
+    return
+
+
+def longMethod(ip, mask):
+    maskSplit = mask.split('.')
+    ipSplit = ip.split('.')
+
+# SUBNET ID PORTION
+
+    subnetID = []
+
+    for i,j in enumerate(maskSplit):
+        if int(j) == 255:
+            subnetID.append(int(ipSplit[i]))
+        elif int(j) == 0:
+            subnetID.append(0)
+        else:
+            interestingOctet = i
+            magicNumber = 256 - int(j)
+            subnetID.append(-1)
+
+    k = 0
+    magicNumberRange = [0]
+    while k < 255:
+        k += magicNumber
+        magicNumberRange.append(k)
+
+    originalNearestDistance = 1000
+    idx = 0
+    #originalNearestDistance = []
+    #idx = []
+    for m,n in enumerate(magicNumberRange):
+        if (int(ipSplit[interestingOctet]) - int(n)) < originalNearestDistance and (int(ipSplit[interestingOctet]) - int(n)) >= 0:
+            originalNearestDistance = int(ipSplit[interestingOctet]) - int(n)
+            idx = m
+
+    subnetIdInterestingOctet = int(magicNumberRange[idx])
+    subnetID[interestingOctet] = subnetIdInterestingOctet
+
+# BROADCAST ADDRESS PORTION
+
+    broadcastAddress = []
+
+    for y,z in enumerate(maskSplit):
+        if int(z) == 255:
+            broadcastAddress.append(int(subnetID[y]))
+        elif int(z) == 0:
+            broadcastAddress.append(255)
+        else:
+            interestingBroadcastAddress = y
+            magicBroadcastAddress = 256 - int(z)
+            subnetBroadcastID = int(subnetID[y])
+            finalOctetFinal = subnetBroadcastID + magicBroadcastAddress - 1
+            broadcastAddress.append(finalOctetFinal)
+
+    firstHost = subnetID[:]
+    firstHost[-1] += 1
+
+    lastHost = broadcastAddress[:]
+    lastHost[-1] -= 1
+
+    return subnetID, broadcastAddress, firstHost, lastHost
+
+
+def calculateSubnetFromCIDR(cidr):
+    binaryList = []
+    for i in range(cidr): # if input is 24 then this would be 0 to 23
+        binaryList.append(1)
+    if len(binaryList) < 32:
+        numberOfZeroes = 32 - len(binaryList)
+    for j in range(numberOfZeroes):
+        binaryList.append(0)
+
+    binaryValues = [128, 64, 32, 16, 8, 4, 2, 1]
+
+    binaryListWithDecimals = []
+
+    for k in range(0, len(binaryList), 8):
+        chunk = binaryList[k:k + 8]
+        binaryListWithDecimals.append(chunk)
+
+    subnetMaskValues = []
+
+    for l in binaryListWithDecimals:
+        currentValue = 0
+        for m,n in enumerate(l):
+            if n == 1:
+                currentValue += binaryValues[m]
+            else:
+                currentValue += 0
+        subnetMaskValues.append(currentValue)
+
+    finalSubnetMask = ".".join(map(str, subnetMaskValues))
+    print(finalSubnetMask)
+    return finalSubnetMask
+
+def calculateCIDRFromSubnet(subnet):
+    binaryValues = [128, 64, 32, 16, 8, 4, 2, 1]
+
+    octet = subnet.split('.')
+
+    addedTimes = 0
+    for i in octet:
+        currentValue = 0
+        for j,k in enumerate(binaryValues):
+            if currentValue != int(i):
+                currentValue += binaryValues[j]
+                addedTimes += 1
+
+    finalOutput = f"/{addedTimes}"
+    print(finalOutput)
+    return finalOutput
+
+def main():
+    ipAddressInput = input("Enter IP address, can include CIDR: ")
+    
+    inputSplit = ipAddressInput.split('/')
+
+    if len(inputSplit) > 1:
+        print("You have inputted a CIDR!")
+        cidrInput = int(inputSplit[1])
+        subnet = calculateSubnetFromCIDR(cidrInput)
+    else:
+        subnet = input("Please enter your subnet mask: ")
+        cidrQuestionInput = input("Would you like to see the CIDR of this subnet (y/n)? ")
+        if cidrQuestionInput == 'y':
+            calculateCIDRFromSubnet(subnet)
+    subnetID, broadcastAddress, firstHost, lastHost = longMethod(ipAddressInput, subnet)
+
+
+    subnetID = ".".join(map(str, subnetID))
+    broadcastAddress = ".".join(map(str, broadcastAddress))
+    firstHost = ".".join(map(str, firstHost))
+    lastHost = ".".join(map(str, lastHost))
+
+    print("\n\n========== Long Calculation Method ==========")
+    print(f"\nSubnet ID: {subnetID}")
+    print(f"Broadcast Address: {broadcastAddress}")
+    print(f"First Host: {firstHost}")
+    print(f"Last Host: {lastHost}\n")
+        
+    #subnetID, broadcastAddress, firstHost, lastHost = shortMethod(ipAddressInput, subnet)
+
+
+if __name__ == "__main__":
+    main()
